@@ -7,13 +7,13 @@
  * of the BSD 3-Clause license. See the LICENSE.txt file for details.
  */
 
-#include <set>
 
 #include <math/functions.h>
 #include <mve/image_color.h>
 #include <mve/image_tools.h>
 #include <mve/mesh_io_ply.h>
 
+#include "pixel_set.h"
 #include "texture_patch.h"
 
 TexturePatch::TexturePatch(int label, std::vector<std::size_t> const & faces,
@@ -192,7 +192,6 @@ TexturePatch::blend(mve::FloatImage::ConstPtr orig) {
 }
 
 typedef std::vector<std::pair<int, int> > PixelVector;
-typedef std::set<std::pair<int, int> > PixelSet;
 
 void
 TexturePatch::prepare_blending_mask(std::size_t strip_width){
@@ -200,14 +199,14 @@ TexturePatch::prepare_blending_mask(std::size_t strip_width){
     int const height = blending_mask->height();
 
     /* Calculate the set of valid pixels at the border of texture patch. */
-    PixelSet valid_border_pixels;
+    PixelSet valid_border_pixels(width, height);
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             if (validity_mask->at(x, y, 0) == 0) continue;
 
             /* Valid border pixels need no invalid neighbours. */
             if (x == 0 || x == width - 1 || y == 0 || y == height - 1) {
-                valid_border_pixels.insert(std::pair<int, int>(x, y));
+                valid_border_pixels.insert(x, y);
                 continue;
             }
 
@@ -219,7 +218,7 @@ TexturePatch::prepare_blending_mask(std::size_t strip_width){
                     /* If the valid pixel has a invalid neighbour: */
                     if (validity_mask->at(nx, ny, 0) == 0) {
                         /* Add the pixel to the set of valid border pixels. */
-                        valid_border_pixels.insert(std::pair<int, int>(x, y));
+                        valid_border_pixels.insert(x, y);
                     }
                 }
             }
@@ -255,7 +254,7 @@ TexturePatch::prepare_blending_mask(std::size_t strip_width){
                          0 <= ny && ny < height &&
                          inner_pixel->at(nx, ny, 0) == 255) {
 
-                         valid_border_pixels.insert(std::pair<int, int>(nx, ny));
+                         valid_border_pixels.insert(nx, ny);
                      }
                  }
              }

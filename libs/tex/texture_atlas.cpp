@@ -14,6 +14,7 @@
 #include <mve/image_tools.h>
 #include <mve/image_io.h>
 
+#include "pixel_set.h"
 #include "texture_atlas.h"
 
 TextureAtlas::TextureAtlas(unsigned int size) :
@@ -51,7 +52,6 @@ void copy_into(mve::ByteImage::ConstPtr src, int x, int y,
 }
 
 typedef std::vector<std::pair<int, int> > PixelVector;
-typedef std::set<std::pair<int, int> > PixelSet;
 
 bool
 TextureAtlas::insert(TexturePatch::ConstPtr texture_patch) {
@@ -114,7 +114,7 @@ TextureAtlas::apply_edge_padding(void) {
     gauss /= 16.0f;
 
     /* Calculate the set of invalid pixels at the border of texture patches. */
-    PixelSet invalid_border_pixels;
+    PixelSet invalid_border_pixels(width, height);
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             if (validity_mask->at(x, y, 0) == 255) continue;
@@ -130,7 +130,7 @@ TextureAtlas::apply_edge_padding(void) {
                         validity_mask->at(nx, ny, 0) == 255) {
 
                         /* Add the pixel to the set of invalid border pixels. */
-                        invalid_border_pixels.insert(std::pair<int, int>(x, y));
+                        invalid_border_pixels.insert(x, y);
                     }
                 }
             }
@@ -203,7 +203,7 @@ TextureAtlas::apply_edge_padding(void) {
                          0 <= ny && ny < height &&
                          new_validity_mask->at(nx, ny, 0) == 0) {
 
-                         invalid_border_pixels.insert(std::pair<int, int>(nx, ny));
+                         invalid_border_pixels.insert(nx, ny);
                     }
                 }
             }
