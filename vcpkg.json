@@ -1,0 +1,12 @@
+{
+  "name": "mvs-texturing",
+  "version-string": "0",
+  "dependencies": [
+    "eigen3",
+    "libjpeg-turbo",
+    "libpng",
+    "tbb",
+    "tiff"
+  ],
+  "builtin-baseline": "d4c0a46cb8f63e5c9fa007d13baf1cb3e43bf7e3"
+}
